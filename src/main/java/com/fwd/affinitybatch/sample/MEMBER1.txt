@@ -1,0 +1,3 @@
+fullnm;birthdt;memberid;tel_hp;email;jointdt
+Ibnu Sina;1977-05-06;8000008;62811912746;ibnu_sina@pineappletech.com;2016-03-16 10:23:55
+BUDI ANDUK;1980-12-31;8200082;628121234567;budi_anduk@yahoo.com;2016-03-16 23:55:59
