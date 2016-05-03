@@ -5,8 +5,23 @@
  */
 package com.fwd.affinitybatch;
 
-import com.fwd.affinitybatch.processor.LoadData;
+import static com.fwd.affinitybatch.JobApp.input;
+import static com.fwd.affinitybatch.JobApp.prop;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 
 /**
  *
@@ -14,27 +29,31 @@ import java.sql.SQLException;
  */
 public class App {
 
-    // The name of the file to open.
-    private static final String path = "D:\\Tes\\inputFiles\\MEMBER1.TXT";
-//    private static final String path = "D:\\Tes\\inputFiles\\";
+     private static Logger log = LogManager.getLogger(App.class);
+    
+    public static void main(String[] args) throws SQLException, IOException, ParseException, InterruptedException, SchedulerException {
+        // load a properties file
+        String path = new File(".").getCanonicalPath();
+//        input = new FileInputStream("C:\\Users\\idnhsn\\Documents\\NetBeansProjects\\Quartz\\conf\\affinity_config.properties");
+        input = new FileInputStream( path + "\\conf\\affinity_config.properties");
+        prop.load(input);
 
-    public static void main(String[] args) throws SQLException {
-        LoadData load = new LoadData();
-        load.Load(path);
-//        File curDir = new File(path);
-//        IOProcess io = new IOProcess();
-//        io.getAllFiles(curDir);
-
-//        File file = new File(path);
-//        File[] listFiles = file.listFiles();
-////        
-//        System.out.println("Jumlah : " + listFiles.length + "\n Yaitu : ");
-//
-//        if (listFiles.length > 0) {
-//            for (File listFile : listFiles) {
-//                System.out.println(listFile.getName());
-//                load.Load(listFile.getName());
-//            }
-//        }
+        int x = Integer.parseInt(prop.getProperty("cron"));
+        
+    	JobDetail job = JobBuilder.newJob(JobApp.class)
+		.withIdentity("Aff_Job", "group1").build();
+ 
+    	Trigger trigger = TriggerBuilder
+		.newTrigger()
+		.withIdentity("Aff_Trigger", "group1")
+		.withSchedule(
+			CronScheduleBuilder.cronSchedule("0/"+ x + " * * * * ?")) // per 20 detik
+//			CronScheduleBuilder.cronSchedule("0 0 10 * * ? *")) // Perhari jam 10 Pagi
+		.build();
+ 
+    	//schedule it
+    	Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+    	scheduler.start();
+    	scheduler.scheduleJob(job, trigger);
     }
 }
